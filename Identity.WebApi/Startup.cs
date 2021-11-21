@@ -21,7 +21,7 @@ namespace Identity.WebApi
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostEnvironment env)
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
