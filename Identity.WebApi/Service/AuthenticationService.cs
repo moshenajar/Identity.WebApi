@@ -52,33 +52,33 @@ namespace Identity.WebApi.Service
                 return new TokenResponse(false, "Invalid credentials.", 1, null);
             }
 
-            if (user != null)
-            {
-                if (!_userManager.IsEmailConfirmedAsync
-                     (user).Result)
-                {
-                    string confirmationToken = _userManager.
-                        GenerateEmailConfirmationTokenAsync(user).Result;
+            //if (user != null)
+            //{
+            //    if (!_userManager.IsEmailConfirmedAsync
+            //         (user).Result)
+            //    {
+            //        string confirmationToken = _userManager.
+            //            GenerateEmailConfirmationTokenAsync(user).Result;
 
 
-                    confirmationToken = user.Id.ToString() + "confirmation" + HttpUtility.UrlEncode(confirmationToken);
+            //        confirmationToken = user.Id.ToString() + "confirmation" + HttpUtility.UrlEncode(confirmationToken);
 
-                    string verifyUrl =
-                        "<a href='" + _apiUrlSettings.ApiConfirmEmail + confirmationToken + "'>אישור</a>";
+            //        string verifyUrl =
+            //            "<a href='" + _apiUrlSettings.ApiConfirmEmail + confirmationToken + "'>אישור</a>";
 
-                    try
-                    {
-                        sendVerificationEmail(user, verifyUrl);
-                    }
-                    catch (Exception e)
-                    {
-                        return new TokenResponse(true, succeededButEmailFail, 1, null);
-                    }
+            //        try
+            //        {
+            //            sendVerificationEmail(user, verifyUrl);
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            return new TokenResponse(true, succeededButEmailFail, 1, null);
+            //        }
 
 
-                    return new TokenResponse(false, "לא בוצע אימות דוא''ל, נשלח אליך דוא''ל אימות נוסף", 401, null);
-                }
-            }
+            //        return new TokenResponse(false, "לא בוצע אימות דוא''ל, נשלח אליך דוא''ל אימות נוסף", 401, null);
+            //    }
+            //}
 
             var result = await _userManager.CheckPasswordAsync(user, password);
 

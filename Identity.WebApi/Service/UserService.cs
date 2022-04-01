@@ -1,5 +1,6 @@
 ﻿using Identity.Domain.AggregatesModel.IdentityAggregate;
 using Identity.Domain.Security.Hashing;
+using Identity.Domain.Security.Tokens;
 using Identity.Domain.Service;
 using Identity.Domain.Service.Communication;
 using Microsoft.AspNetCore.Identity;
@@ -18,18 +19,21 @@ namespace Identity.WebApi.Service
         private readonly AppUserManager _userManager;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IEmailService _emailService;
+        private readonly ITokenHandler _tokenHandler;
 
 
         public UserService(AppUserManager userManager,
             IPasswordHasher passwordHasher,
+            ITokenHandler tokenHandler,
             IEmailService emailService)
         {
             _userManager = userManager;
             _passwordHasher = passwordHasher;
+            _tokenHandler = tokenHandler;
             _emailService = emailService;
         }
 
-        public async Task<CreateUserResponse> CreateUserAsync(AppIdentityUser user, string newPassword, params ApplicationRole[] userRoles)
+        public async Task<TokenResponse> CreateUserAsync(AppIdentityUser user, string newPassword, params ApplicationRole[] userRoles)
         {
             string errorCode = string.Empty;
             const string succeeded = "Registration successful, please check your email verification instructions";
@@ -38,7 +42,7 @@ namespace Identity.WebApi.Service
             var existingUser = await _userManager.FindByEmailAsync(user.Email);
             if (existingUser != null)
             {
-                return new CreateUserResponse(false, "Email already in use.", 1);
+                return new TokenResponse(false, "קיים יוזר במערכת", 401, null);
             }
 
             result = await _userManager.CreateAsync(user, newPassword);
@@ -54,7 +58,7 @@ namespace Identity.WebApi.Service
                 }
 
 
-                return new CreateUserResponse(false, errorCode, 1);
+                return new TokenResponse(false, errorCode, 401, null);
             }
 
 
@@ -73,7 +77,12 @@ namespace Identity.WebApi.Service
             // send email
             //sendVerificationEmail(user, verifyUrl);
 
-            return new CreateUserResponse(true, succeeded, 0);
+            var accessToken = _tokenHandler.CreateAccessToken(user);
+
+            await _userManager.SetAuthenticationTokenAsync(user, "MyIsrael", "Token", accessToken.Token);
+            await _userManager.SetAuthenticationRefreshTokenAsync(user, accessToken.RefreshToken.Token, accessToken.RefreshToken.Expiration);
+            return new TokenResponse(true, null, 0, accessToken);
+
         }
 
         public async Task<AppIdentityUser> FindByEmailAsync(string email)

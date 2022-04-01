@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Identity.Domain.AggregatesModel.IdentityAggregate;
+using Identity.Domain.Security.Tokens;
 using Identity.Domain.Service;
 using Identity.Domain.Service.Communication;
 using Identity.WebApi.Controllers.Resources;
@@ -57,7 +58,7 @@ namespace Identity.WebApi.Controllers
             }
 
             //var userResource = _mapper.Map<AppIdentityUser, UserResource>(response.User);
-            return Ok(new ServiceResponse<object>
+            return Ok(new ServiceResponse<AccessToken>(result.response.Token, result.response.Expiration, result.response.RefreshToken)
             {
                 isSuccess = result.Succeeded,
                 Message = result.Message,

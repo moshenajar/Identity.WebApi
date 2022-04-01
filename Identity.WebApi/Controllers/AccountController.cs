@@ -1,4 +1,5 @@
-﻿using Identity.Domain.Security.Tokens;
+﻿using Identity.Domain.Security.Otp;
+using Identity.Domain.Security.Tokens;
 using Identity.Domain.Service;
 using Identity.WebApi.Controllers.Resources;
 using Identity.WebApi.model;
@@ -62,6 +63,7 @@ namespace Identity.WebApi.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Todo: check if emailUser from token equal with Email request.
                 var result = await _authenticationService.RefreshTokenAsync(refreshTokenResource.Token, refreshTokenResource.UserEmail);
                 if (result.Succeeded)
                 {
@@ -97,6 +99,7 @@ namespace Identity.WebApi.Controllers
         {
             if (ModelState.IsValid)
             {
+                //Todo: check if emailUser from token equal with Email request.
                 var result = await _authenticationService.RevokeToken(revokeTokenResource.Email);
                 if (result.Succeeded)
                 {
@@ -122,7 +125,6 @@ namespace Identity.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> ValidateToken([FromBody] string token)
         {
-
             return Ok(new ServiceResponse<object>
             {
                 isSuccess = true,
@@ -130,5 +132,57 @@ namespace Identity.WebApi.Controllers
                 ResultCode = 0
             });
         }
+
+        [Route("otp/send")]
+        [HttpPost]
+        public async Task<IActionResult> Otp([FromBody] OtpResource otp)
+        {
+            //Todo: check if email/phone from user equal with Email/sms request.
+
+            var result = new OtpResponse();
+            result.description = "OK";
+            result.code = 0;
+            result.entities.sent.distributionType = "sms";
+            result.entities.sent.status = 0;
+            result.entities.sent.message = "OTP נשלח באמצעות sms";
+            result.entities.sent.address = "0505586852";
+            result.password.expiredTime = 1608579904476;
+            result.id = "5fe0e091d937eb7397be6b5f";
+
+            //Todo: Save in DB
+
+            return Ok(new ServiceResponse<OtpResponse>(result.description, result.code, result.entities, result.password, result.id)
+            {
+                isSuccess = result.entities.sent.status == 0 ? true : false,
+                Message = result.entities.sent.message,
+                ResultCode = result.code
+            });
+        }
+
+        [Route("confirm")]
+        [HttpPost]
+        public async Task<IActionResult> confirm([FromBody] OtpValidateResource otpValidate)
+        {
+            var result = new OtpValidateResponse();
+            //Todo: check if otpValidate.id exsist and validation in DB
+            //      and check what distribution Type it is
+            //if fails = return BadResponse
+            //else -> update user acording to distribution Type
+
+            result.description = "אימות הצליח";
+            result.code = 0;
+            result.entities.expiredTime = 1608579904476;
+            result.entities.attemptsNumber = 1;
+
+
+
+            return Ok(new ServiceResponse<OtpValidateResponse>(result.code, result.entities.expiredTime, result.entities.attemptsNumber)
+            {
+                isSuccess = result.code == 0 ? true : false,
+                Message = result.entities.sent.message,
+                ResultCode = result.code
+            });
+        }
+
     }
 }

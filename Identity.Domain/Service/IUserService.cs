@@ -10,7 +10,7 @@ namespace Identity.Domain.Service
 {
     public interface IUserService
     {
-        Task<CreateUserResponse> CreateUserAsync(AppIdentityUser user, string newPassword, params ApplicationRole[] userRoles);
+        Task<TokenResponse> CreateUserAsync(AppIdentityUser user, string newPassword, params ApplicationRole[] userRoles);
         Task<AppIdentityUser> FindByEmailAsync(string email);
         Task<Response> ConfirmEmail(string token);
         Task<CreateUserResponse> ForgotPassword(string email);

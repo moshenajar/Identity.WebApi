@@ -137,7 +137,9 @@ namespace Identity.WebApi.Service
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
                 new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
-                new Claim(JwtRegisteredClaimNames.Gender, user.Gender.ToString())
+                new Claim(JwtRegisteredClaimNames.Gender, user.Gender.ToString()),
+                new Claim("EmailConfirmed", user.EmailConfirmed == true ? "1" : "0"),
+                new Claim("PhoneNumberConfirmed", user.PhoneNumberConfirmed == true ? "1" : "0")
             };
 
 
